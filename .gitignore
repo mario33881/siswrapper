@@ -3,3 +3,4 @@ dist
 siswrapper.egg-info
 
 siswrapper/__pycache__
+tests/__pycache__

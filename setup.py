@@ -1,18 +1,18 @@
 import setuptools
-import siswrapper.siswrapper as siswrapper
+import siswrapper._version as _version
 
 if __name__ == '__main__':
-    version_date = siswrapper.__version__
+    version_date = _version.__version__
     version = version_date.split(" ")[1]
 
     setuptools.setup(
-        install_requires=['pexpect==4.6.0'],  # dependency
+        install_requires=['pexpect==4.8.0'],  # dependency
         python_requires='>=3',
         packages=setuptools.find_packages(include=['siswrapper']),
 
         name='siswrapper',  # name of the PyPI-package.
         version=version,    # version number
-        author=siswrapper.__author__,
+        author="Zenaro Stefano (mario33881)",
         author_email="mariortgasd@hotmail.com",
         url="https://github.com/mario33881/siswrapper",
         keywords='SIS BLIF siswrapper wrapper development',

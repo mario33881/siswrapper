@@ -11,12 +11,16 @@ Requirements:
 """
 
 __author__ = "Zenaro Stefano"
-__version__ = "2020-11-14 1.0.0"
 
 import os
 import re
 
 import pexpect
+
+try:
+    from ._version import __version__
+except ImportError:
+    from _version import __version__
 
 
 def string_to_list(t_str, t_char=" "):
