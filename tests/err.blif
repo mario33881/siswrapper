@@ -1,0 +1,7 @@
+.model errortest
+.inputs a b
+.outputs o
+.names a b o
+00 
+11 
+.end
