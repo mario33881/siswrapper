@@ -18,9 +18,9 @@ import re
 import pexpect
 
 try:
-    from ._version import __version__
+    from ._version import __version__  # noqa: F401
 except ImportError:
-    from _version import __version__
+    from _version import __version__  # noqa: F401
 
 
 def string_to_list(t_str, t_char=" "):
