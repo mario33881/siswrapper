@@ -215,7 +215,7 @@ class TestSiswrapper(unittest.TestCase):
 
         # try to open the file that doesn't exist
         file_path = os.path.join(curr_dir, random_name)
-        res = self.sw_session.read_blif(random_name)
+        res = self.sw_session.read_blif(file_path)
         self.assertFalse(res["success"], "action should fail, file doesn't exist")
         self.assertIn("[ERROR][READ_BLIF] '{}' file doesn't exist".format(file_path),
                       res["errors"], "there should be an error")
