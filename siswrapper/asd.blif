@@ -1,6 +1,0 @@
-.model and
-.inputs a b
-.outputs o
-.names a b o
-11 1
-.end
