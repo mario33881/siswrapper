@@ -1,9 +1,10 @@
 import setuptools
 import siswrapper._version as _version
 
+version_date = _version.__version__
+version = version_date.split(" ")[1]
+
 if __name__ == '__main__':
-    version_date = _version.__version__
-    version = version_date.split(" ")[1]
 
     setuptools.setup(
         install_requires=['pexpect==4.8.0'],  # dependency
