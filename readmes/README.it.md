@@ -9,9 +9,9 @@ Siswrapper permette agli sviluppatori di scrivere codice che integra SIS.
 > |[English](../README.md)|[Italiano](readmes/README.it.md)|
 > |-|-|
 
-<center>
+<p align="center">
     <img height="150px" alt="logo" src="../images/logo.svg">
-</center>
+</p>
 
 <br>
 

@@ -9,9 +9,9 @@ Siswrapper enables developers to code scripts that embeds SIS in any way.
 > |[English](README.md)|[Italiano](readmes/README.it.md)|
 > |-|-|
 
-<center>
+<p align="center">
     <img height="150px" alt="logo" src="images/logo.svg">
-</center>
+</p>
 
 <br>
 
