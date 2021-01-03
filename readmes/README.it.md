@@ -1,5 +1,7 @@
 # SISWRAPPER
 
+![Siswrapper](https://github.com/mario33881/siswrapper/workflows/Siswrapper/badge.svg)
+
 Siswrapper e' un **wrapper per [SIS](https://jackhack96.github.io/logic-synthesis/sis.html)**, lo strumento di sintesi e ottimizzazione di circuiti sequenziali.
 
 Siswrapper permette agli sviluppatori di scrivere codice che integra SIS.
