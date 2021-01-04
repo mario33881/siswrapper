@@ -49,7 +49,7 @@ to control interactive shells by spawning and connecting to their process.
     > pexpect doesn't have all its features on Windows and SIS works best on linux OSes
 * Python 3
 * the pexpect library for Python: control interactive shells via Python
-* SIS: the tool for synthesis and optimization of sequential circuits
+* SIS, set in the path environment variable (callable with the ```sis``` command): the tool for synthesis and optimization of sequential circuits
     > You can [download it here](https://jackhack96.github.io/logic-synthesis/sis.html)
     
 [Go to the index](#index)
@@ -116,6 +116,11 @@ sis.script_rugged()
 # directly supported by this library:
 sis.exec("help")
 
+# try to execute a command and parse the output
+# without calling directly the correct method
+# > fallback method in case the command is not recognized: exec()
+sis.parsed_exec("simulate 00 10 11")
+
 # save the circuit to a new file
 sis.write_blif("optimized.blif")
 
@@ -133,6 +138,23 @@ All the methods return a dictionary with:
 [Go to the index](#index)
 
 ## Changelog ![](https://i.imgur.com/SDKHpak.png)
+
+**2021-01-04 1.1.0:** <br>
+### Added features
+* Added the ```parsed_output()``` method:
+  it reads a command and automatically calls the best method
+  to parse the output of that command. 
+  
+  If the command is not recognized it falls back to the ```exec()``` method.
+
+### Changes
+* The ```simulate()``` method now returns a string with the outputs (not space between each output):
+    > there was no reason to calculate sums, subtractions, ... from the output
+    > so the string type makes more sense
+
+### Fixes
+* Now the ```exec()``` knows how to treat the ```quit``` 
+  and ```exit``` commands without raising Exceptions.
 
 **2020-11-14 1.0.0:** <br>
 First commit

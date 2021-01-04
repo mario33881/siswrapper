@@ -50,7 +50,7 @@ attraverso un processo eseguito in background.
     > e SIS funziona al 100% su linux
 * Python 3
 * la libreria pexpect per Python: permette di controllare shell interattive attraverso Python
-* SIS: lo strumento per la sintesi e l'ottimizzazione di circuiti sequenziali
+* SIS, impostato nelle variabili di ambiente (eseguibile con il comando ```sis```): lo strumento per la sintesi e l'ottimizzazione di circuiti sequenziali
     > E' possibile [scaricarlo da questa pagina](https://jackhack96.github.io/logic-synthesis/sis.html)
 
 [Torna all'indice](#indice)
@@ -117,6 +117,11 @@ sis.script_rugged()
 # da questa libreria
 sis.exec("help write_blif")
 
+# prova ad eseguire un comando ed effettuare il parsing dell'output
+# senza chiamare direttamente il metodo corretto
+# > se il comando non viene riconosciuto viene eseguito da exec()
+sis.parsed_exec("simulate 00 10 11")  # chiamera' sis.simulate()
+
 # salva il circuito in un nuovo file blif
 sis.write_blif("ottimizzato.blif")
 
@@ -135,6 +140,23 @@ Tutti i metodi restituiscono un dizionario con:
 
 ## Changelog ![](https://i.imgur.com/SDKHpak.png)
 
+**2021-01-04 1.1.0:** <br>
+### Funzionalita' aggiunte
+* Aggiunto il metodo ```parsed_output()```:
+  legge un comando e chiama automaticamente il metodo migliore 
+  per fare il parsing dell'output del comando stesso.
+  
+  Se il comando non viene riconosciuto verra' eseguito dal metodo ```exec()```.
+
+### Cambiamenti
+* Il metodo ```simulate()``` adesso restituisce una stringa con gli output (senza spazi tra ogni bit di output):
+    > non c'era motivo di effettuare calcoli con l'output di simulate
+    > quindi il tipo stringa ha piu' senso
+
+### Fix
+* Adesso il metodo ```exec()``` sa come gestire i comandi ```quit``` 
+  e ```exit``` senza lanciare Exception.
+  
 **2020-11-14 1.0.0:** <br>
 Primo commit
 

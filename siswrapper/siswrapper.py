@@ -8,6 +8,7 @@ SISWRAPPER: wraps SIS so that it can be controlled using python
 
 Requirements:
 * pexpect: python library that can communicate with an interactive shell's process
+* SIS: the tool for synthesis and optimization of sequential circuits
 """
 
 __author__ = "Zenaro Stefano"
@@ -66,6 +67,41 @@ def str_to_numbers(t_v):
         out["errors"].append("Element(s) is/are not a number")
 
     return out
+
+
+def removeprefix(string, prefix):
+    """
+    Returns <string> without the <prefix> prefix.
+
+    Copied from https://www.python.org/dev/peps/pep-0616/#specification
+    to support python versions < 3.9
+
+    :param str string: string from which to remove prefix
+    :param str prefix: prefix to remove from string
+    :return str: string without prefix
+    """
+    if string.startswith(prefix):
+        return string[len(prefix):]
+    else:
+        return string[:]
+
+
+def removesuffix(string, suffix):
+    """
+    Returns <string> without the <suffix> suffix.
+
+    Copied from https://www.python.org/dev/peps/pep-0616/#specification
+    to support python versions < 3.9
+
+    :param str string: string from which to remove suffix
+    :param str suffix: suffix to remove from string
+    :return str: string without suffix
+    """
+    # suffix='' should not call self[:-0].
+    if suffix and string.endswith(suffix):
+        return string[:-len(suffix)]
+    else:
+        return string[:]
 
 
 class Siswrapper:
@@ -212,6 +248,10 @@ class Siswrapper:
         except pexpect.exceptions.TIMEOUT:
             res["errors"].append("[ERROR][WAIT_END_COMMAND] Timeout while waiting the end of command execution")
 
+        except pexpect.exceptions.EOF:
+            # entered "quit" or "exit" command
+            res["success"] = True
+
         return res
 
     def exec(self, t_command):
@@ -229,8 +269,15 @@ class Siswrapper:
             wait_res = self.wait_end_command()
             if wait_res["success"]:
                 res["success"] = True
+
                 # Remove the command from the output
-                res["stdout"] = wait_res["stdout"].strip().strip(t_command)
+                res["stdout"] = wait_res["stdout"]
+                if wait_res["stdout"] is not None:
+                    res["stdout"] = removeprefix(wait_res["stdout"].strip(), t_command).strip()
+                else:
+                    # if command was quit or exit, change self.started state
+                    if t_command.strip() in ["quit", "exit"]:
+                        self.started = False
 
                 if res["stdout"] == "":
                     res["stdout"] = None
@@ -241,6 +288,83 @@ class Siswrapper:
             res["errors"].append("[ERROR][EXEC] Can't execute command: SIS's process is not running")
 
         return res
+
+    def parsed_exec(self, t_command):  # noqa: C901
+        """
+        Parsed and executes the <t_command> command as best as it thinks it can.
+
+        First it tries to find the correct method to call to execute the command.
+        If this method doesn't find the best method for that command, it is
+        executed by the self.exec() method.
+
+        :param str t_command: command to execute using SIS
+        :return dict cmd_res: results of the operation (success, errors, stdout)
+        """
+        cmd_res = {"success": False, "errors": [], "stdout": None}
+        strip_cmd = t_command.strip()
+
+        # read_blif
+        if re.match(r"^read_blif [\s]*-a [\s]*(\S*)$", strip_cmd):
+            param = re.match(r"^read_blif [\s]*-a [\s]*(\S*)$", strip_cmd).groups()[0]
+            param = param.strip('"')
+            cmd_res = self.read_blif(param, t_append=True)
+
+        elif re.match(r"^read_blif [\s]*(\S*) [\s]*-a$", strip_cmd):
+            param = re.match(r"^read_blif [\s]*(\S*) [\s]*-a$", strip_cmd).groups()[0]
+            param = param.strip('"')
+            cmd_res = self.read_blif(param, t_append=True)
+
+        elif re.match(r"^read_blif [\s]*(\S*)$", strip_cmd):
+            param = re.match(r"^read_blif [\s]*(\S*)$", strip_cmd).groups()[0]
+            param = param.strip('"')
+            cmd_res = self.read_blif(param)
+
+        # read_eqn
+        elif re.match(r"^read_eqn [\s]*-a [\s]*(\S*)$", strip_cmd):
+            param = re.match(r"^read_eqn [\s]*-a [\s]*(\S*)$", strip_cmd).groups()[0]
+            param = param.strip('"')
+            cmd_res = self.read_eqn(param, t_append=True)
+
+        elif re.match(r"^read_eqn [\s]*(\S*) [\s]*-a$", strip_cmd):
+            param = re.match(r"^read_eqn [\s]*(\S*) [\s]*-a$", strip_cmd).groups()[0]
+            param = param.strip('"')
+            cmd_res = self.read_eqn(param, t_append=True)
+
+        elif re.match(r"^read_eqn [\s]*(\S*)$", strip_cmd):
+            param = re.match(r"^read_eqn [\s]*(\S*)$", strip_cmd).groups()[0]
+            param = param.strip('"')
+            cmd_res = self.read_eqn(param)
+
+        # write_blif
+        elif re.match(r"^write_blif[\s]*(\S*)$", strip_cmd):
+            param = re.match(r"^write_blif[\s]*(\S*)$", strip_cmd).groups()[0]
+            param = param.strip('"')
+            cmd_res = self.write_blif(param)
+
+        # write_eqn
+        elif re.match(r"^write_eqn[\s]*(\S*)$", strip_cmd):
+            param = re.match(r"^write_eqn[\s]*(\S*)$", strip_cmd).groups()[0]
+            param = param.strip('"')
+            cmd_res = self.write_blif(param)
+
+        # source script.rugged
+        elif strip_cmd == "source script.rugged":
+            cmd_res = self.script_rugged()
+
+        # print_stats
+        elif strip_cmd == "print_stats":
+            cmd_res = self.print_stats()
+
+        # simulate
+        elif re.match(r"^simulate [\s]*([ 01]*)$", strip_cmd):
+            param = re.match(r"^simulate [\s]*([ 01]*)$", strip_cmd).groups()[0]
+            cmd_res = self.simulate(param)
+
+        # command not found... execute it
+        else:
+            cmd_res = self.exec(strip_cmd)
+
+        return cmd_res
 
     def interact(self):
         """
@@ -290,9 +414,9 @@ class Siswrapper:
 
             if os.path.isfile(blif_fullpath):
                 if t_append:
-                    exec_res = self.exec("read_blif -a " + blif_fullpath)
+                    exec_res = self.exec('read_blif -a "' + blif_fullpath + '"')
                 else:
-                    exec_res = self.exec("read_blif " + blif_fullpath)
+                    exec_res = self.exec('read_blif "' + blif_fullpath + '"')
 
                 if exec_res["success"]:
                     res["stdout"] = exec_res["stdout"]
@@ -344,9 +468,9 @@ class Siswrapper:
 
             if os.path.isfile(eqn_fullpath):
                 if t_append:
-                    exec_res = self.exec("read_eqn -a " + eqn_fullpath)
+                    exec_res = self.exec('read_eqn -a "' + eqn_fullpath + '"')
                 else:
-                    exec_res = self.exec("read_eqn " + eqn_fullpath)
+                    exec_res = self.exec('read_eqn "' + eqn_fullpath + '"')
 
                 if exec_res["success"]:
                     res["stdout"] = exec_res["stdout"]
@@ -580,13 +704,13 @@ class Siswrapper:
 
                     if len(v_stdout) == 3:
                         if v_stdout[0] == "Network simulation:":
-                            outputs = string_to_list(v_stdout[1].replace("Outputs:", ""))
+                            outputs = v_stdout[1].replace("Outputs:", "").replace(" ", "")
                             next_state = v_stdout[2].replace("Next state:", "")
 
                             res["success"] = True
 
                             res["output"] = {
-                                "outputs": outputs,
+                                "outputs": outputs.strip(),
                                 "next_state": next_state.strip()
                             }
                         else:

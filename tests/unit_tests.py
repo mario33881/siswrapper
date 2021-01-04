@@ -95,6 +95,14 @@ class TestUtils(unittest.TestCase):
 
             res = sw.str_to_numbers(test["i"])
             self.assertEqual(res, test["o"], "error during test: \"{}\"".format(test))
+    
+    @unittest.skip("TODO: write tests")
+    def test_removeprefix(self):
+        pass
+
+    @unittest.skip("TODO: write tests")
+    def test_removesuffix(self):
+        pass
 
 
 class TestSiswrapper(unittest.TestCase):
@@ -190,6 +198,10 @@ class TestSiswrapper(unittest.TestCase):
         pass
 
     @unittest.skip("TODO: write tests")
+    def test_parsed_exec(self):
+        pass
+
+    @unittest.skip("TODO: write tests")
     def test_interact(self):
         pass
 
@@ -224,7 +236,7 @@ class TestSiswrapper(unittest.TestCase):
         file_path = os.path.join(curr_dir, "err.blif")
         res = self.sw_session.read_blif(file_path)
         self.assertFalse(res["success"], "action should fail, file is not formatted correctly")
-        self.assertIn('"{}", line 5: bad character in PLA'.format(file_path), res["errors"], "there should be an error")
+        self.assertIn('"{}", line 5: bad character in PLA table'.format(file_path), res["errors"], "there should be an error")
 
         # try to open a file that exists and is well formatted
         file_path = os.path.join(curr_dir, "and.blif")
