@@ -291,9 +291,38 @@ class TestSiswrapper(unittest.TestCase):
     #
     # ====================================================================================================
 
-    @unittest.skip("TODO: write tests")
     def test_print_stats(self):
-        pass
+        # Circuit with no STG
+        file_path = os.path.join(curr_dir, "and.blif")
+        cmd_res = self.sw_session.read_blif(file_path)
+        self.assertTrue(cmd_res["success"], "read_blif execution should be successfull")
+        
+        cmd_res = self.sw_session.print_stats()
+
+        self.assertTrue(cmd_res["success"], "print_stats execution should be successfull")
+        self.assertEqual(cmd_res["output"]["name"], "and")
+        self.assertEqual(cmd_res["output"]["pi"], 2)
+        self.assertEqual(cmd_res["output"]["po"], 1)
+        self.assertEqual(cmd_res["output"]["nodes"], 1)
+        self.assertEqual(cmd_res["output"]["latches"], 0)
+        self.assertEqual(cmd_res["output"]["lits"], 2)
+        self.assertEqual(cmd_res["output"]["states"], 0)
+
+        # Circuit with an STG
+        file_path = os.path.join(curr_dir, "automa.blif")
+        cmd_res = self.sw_session.read_blif(file_path)
+        self.assertTrue(cmd_res["success"], "read_blif execution should be successfull")
+        
+        cmd_res = self.sw_session.print_stats()
+
+        self.assertTrue(cmd_res["success"], "print_stats execution should be successfull")
+        self.assertEqual(cmd_res["output"]["name"], "automa")
+        self.assertEqual(cmd_res["output"]["pi"], 3)
+        self.assertEqual(cmd_res["output"]["po"], 1)
+        self.assertEqual(cmd_res["output"]["nodes"], 1)
+        self.assertEqual(cmd_res["output"]["latches"], 0)
+        self.assertEqual(cmd_res["output"]["lits"], 0)
+        self.assertEqual(cmd_res["output"]["states"], 5)
 
     # ====================================================================================================
     #
@@ -301,9 +330,23 @@ class TestSiswrapper(unittest.TestCase):
     #
     # ====================================================================================================
 
-    @unittest.skip("TODO: write tests")
     def test_simulate(self):
-        pass
+        # Circuit with no STG
+        file_path = os.path.join(curr_dir, "and.blif")
+        cmd_res = self.sw_session.read_blif(file_path)
+        self.assertTrue(cmd_res["success"], "read_blif execution should be successfull")
+
+        cmd_res = self.sw_session.simulate("11")
+        self.assertTrue(cmd_res["success"], "simulate execution should be successfull")
+        self.assertEqual(cmd_res["output"]["outputs"], "1")
+
+        cmd_res = self.sw_session.simulate("0     1")
+        self.assertTrue(cmd_res["success"], "simulate execution should be successfull")
+        self.assertEqual(cmd_res["output"]["outputs"], "0")
+
+        cmd_res = self.sw_session.simulate("  0 0   ")
+        self.assertTrue(cmd_res["success"], "simulate execution should be successfull")
+        self.assertEqual(cmd_res["output"]["outputs"], "0")
 
 
 if __name__ == "__main__":
