@@ -140,6 +140,13 @@ Tutti i metodi restituiscono un dizionario con:
 
 ## Changelog ![](https://i.imgur.com/SDKHpak.png)
 
+**2021-01-09 1.1.1:** <br>
+### Fix/funzionalita' aggiuntive
+* ```simulate()``` e' eseguito dal metodo ```parsed_output()```
+anche quando viene inserito un input non valido (caratteri diversi da "0" e/o "1")
+e quando viene eseguito il comando ```sim```
+* ```simulate()``` e ```print_stats()``` puo' gestire correttamente gli output delle FSM (fix:```TypeError: 'NoneType' object is not subscriptable```)
+
 **2021-01-04 1.1.0:** <br>
 ### Funzionalita' aggiunte
 * Aggiunto il metodo ```parsed_output()```:

@@ -8,11 +8,11 @@ Siswrapper enables developers to code scripts that embeds SIS in any way.
 
 > Read this README in: 
 >
-> |[English](README.md)|[Italiano](readmes/README.it.md)|
+> |[English](https://github.com/mario33881/siswrapper/blob/main/README.md)|[Italiano](https://github.com/mario33881/siswrapper/blob/main/readmes/README.it.md)|
 > |-|-|
 
 <p align="center">
-    <img height="150px" alt="logo" src="images/logo.svg">
+    <img height="150px" alt="logo" src="https://raw.githubusercontent.com/mario33881/siswrapper/main/images/logo.svg">
 </p>
 
 <br>
@@ -138,6 +138,13 @@ All the methods return a dictionary with:
 [Go to the index](#index)
 
 ## Changelog ![](https://i.imgur.com/SDKHpak.png)
+
+**2021-01-09 1.1.1:** <br>
+### Fixes/features
+* ```simulate()``` is executed by ```parsed_output()```
+even with not correct input (non "0" and/or "1" chars)
+and with the abbreviated command ```sim```
+* ```simulate()``` and ```print_stats()``` can manage FSM outputs (fix:```TypeError: 'NoneType' object is not subscriptable```)
 
 **2021-01-04 1.1.0:** <br>
 ### Added features

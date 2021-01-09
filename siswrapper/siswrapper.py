@@ -336,14 +336,14 @@ class Siswrapper:
             cmd_res = self.read_eqn(param)
 
         # write_blif
-        elif re.match(r"^write_blif[\s]*(\S*)$", strip_cmd):
-            param = re.match(r"^write_blif[\s]*(\S*)$", strip_cmd).groups()[0]
+        elif re.match(r"^write_blif [\s]*(\S*)$", strip_cmd):
+            param = re.match(r"^write_blif [\s]*(\S*)$", strip_cmd).groups()[0]
             param = param.strip('"')
             cmd_res = self.write_blif(param)
 
         # write_eqn
-        elif re.match(r"^write_eqn[\s]*(\S*)$", strip_cmd):
-            param = re.match(r"^write_eqn[\s]*(\S*)$", strip_cmd).groups()[0]
+        elif re.match(r"^write_eqn [\s]*(\S*)$", strip_cmd):
+            param = re.match(r"^write_eqn [\s]*(\S*)$", strip_cmd).groups()[0]
             param = param.strip('"')
             cmd_res = self.write_blif(param)
 
@@ -356,8 +356,12 @@ class Siswrapper:
             cmd_res = self.print_stats()
 
         # simulate
-        elif re.match(r"^simulate [\s]*([ 01]*)$", strip_cmd):
-            param = re.match(r"^simulate [\s]*([ 01]*)$", strip_cmd).groups()[0]
+        elif re.match(r"^simulate [\s]*(.*)$", strip_cmd):
+            param = re.match(r"^simulate [\s]*(.*)$", strip_cmd).groups()[0]
+            cmd_res = self.simulate(param)
+
+        elif re.match(r"^sim [\s]*(.*)$", strip_cmd):
+            param = re.match(r"^sim [\s]*(.*)$", strip_cmd).groups()[0]
             cmd_res = self.simulate(param)
 
         # command not found... execute it
@@ -634,11 +638,11 @@ class Siswrapper:
                         pattern = r"^(\S*)[\s]*pi=[\s]*(\d*)[\s]*po=[\s]*(\d*)[\s]" \
                                   r"*nodes=[\s]*(\d*)[\s]*latches=[\s]*(\d*)[\s]*$"
                         infos = v_stdout[0]
-                        lits = v_stdout[1]
-                        parsed_lits = lits.replace("lits(sop)=", "").strip()
-
+                        lits_states = v_stdout[1]
+                        mlits = re.match(r"lits\(sop\)= [\s]*(\d*).*", lits_states)
+                        mstates = re.match(r".*#states\(STG\)= [\s]*(\d*)", lits_states)
                         minfos = re.match(pattern, infos)
-                        if minfos:
+                        if minfos and mlits:
                             try:
                                 infosgroups = minfos.groups()
                                 name = infosgroups[0]
@@ -646,7 +650,12 @@ class Siswrapper:
                                 po = int(infosgroups[2])
                                 nodes = int(infosgroups[3])
                                 latches = int(infosgroups[4])
-                                int_lits = int(parsed_lits)
+                                int_lits = int(mlits.groups()[0])
+                                states = 0
+
+                                if mstates:
+                                    states = mstates.groups()[0]
+                                    states = int(states)
 
                                 res["output"] = {
                                     "name": name,
@@ -654,7 +663,8 @@ class Siswrapper:
                                     "po": po,
                                     "nodes": nodes,
                                     "latches": latches,
-                                    "lits": int_lits
+                                    "lits": int_lits,
+                                    "states": states
                                 }
 
                                 res["success"] = True
@@ -693,48 +703,84 @@ class Siswrapper:
 
         if self.started:
             if self.readsomething:
-                inputs = "".join([char + " " for char in inputs if char in ["0", "1"]]).strip()
+                accepted_chars = True
+                i = 0
+                while accepted_chars and i < len(inputs):
+                    if inputs[i] not in ["0", "1", " "]:
+                        accepted_chars = False
+                    i += 1
 
-                exec_res = self.exec('simulate ' + inputs)
+                if accepted_chars:
+                    inputs = "".join([char + " " for char in inputs if char in ["0", "1"]]).strip()
 
-                res["stdout"] = exec_res["stdout"]
+                    exec_res = self.exec('simulate ' + inputs)
 
-                if exec_res["success"]:
-                    v_stdout = exec_res["stdout"].strip().split("\r\n")
+                    res["stdout"] = exec_res["stdout"]
 
-                    if len(v_stdout) == 3:
-                        if v_stdout[0] == "Network simulation:":
-                            outputs = v_stdout[1].replace("Outputs:", "").replace(" ", "")
-                            next_state = v_stdout[2].replace("Next state:", "")
+                    if exec_res["success"]:
+                        v_stdout = exec_res["stdout"].strip().split("\r\n")
 
-                            res["success"] = True
+                        if len(v_stdout) == 3:
+                            # simulating a network with no STGs
+                            if v_stdout[0] == "Network simulation:":
+                                outputs = v_stdout[1].replace("Outputs:", "").replace(" ", "")
+                                next_state = v_stdout[2].replace("Next state:", "")
 
-                            res["output"] = {
-                                "outputs": outputs.strip(),
-                                "next_state": next_state.strip()
-                            }
+                                res["success"] = True
+
+                                res["output"] = {
+                                    "outputs": outputs.strip(),
+                                    "next_state": next_state.strip()
+                                }
+                            else:
+                                stats = self.print_stats()
+                                n_net_inputs = stats["output"]["pi"]
+
+                                if "simulate network: network has {} inputs;".format(n_net_inputs) in v_stdout[0]:
+                                    res["errors"].append(v_stdout[0])
+                                else:
+                                    res["errors"].append("[ERROR][SIMULATE] Something went wrong during simulation")
+                        elif len(v_stdout) == 7:
+                            # simulating a network with an STG (FSM)
+                            if v_stdout[0] == "Network simulation:" and v_stdout[4] == "STG simulation:":
+                                outputs = v_stdout[1].replace("Outputs:", "").replace(" ", "")
+                                next_state = v_stdout[2].replace("Next state:", "")
+
+                                stg_outputs = v_stdout[5].replace("Outputs:", "").replace(" ", "")
+                                stg_next_state = v_stdout[6].replace("Next state:", "")
+
+                                res["success"] = True
+
+                                res["output"] = {
+                                    "outputs": outputs.strip(),
+                                    "next_state": next_state.strip(),
+                                    "stg_outputs": stg_outputs.strip(),
+                                    "stg_next_state": stg_next_state.strip()
+                                }
+                            else:
+                                stats = self.print_stats()
+                                n_net_inputs = stats["output"]["pi"]
+
+                                if "simulate network: network has {} inputs;".format(n_net_inputs) in v_stdout[0]:
+                                    res["errors"].append(v_stdout[0])
+                                else:
+                                    res["errors"].append("[ERROR][SIMULATE] Something went wrong during simulation")
                         else:
-                            stats = self.print_stats()
-                            n_net_inputs = stats["output"]["pi"]
+                            try:
+                                stats = self.print_stats()
+                                n_net_inputs = stats["output"]["pi"]
 
-                            if "simulate network: network has {} inputs;".format(n_net_inputs) in v_stdout[0]:
-                                res["errors"].append(v_stdout[0])
-                            else:
-                                res["errors"].append("[ERROR][SIMULATE] Something went wrong during simulation")
+                                if "simulate network: network has {} inputs;".format(n_net_inputs) in v_stdout[0]:
+                                    res["errors"].append(v_stdout[0])
+                                else:
+                                    res["errors"].append("[ERROR][SIMULATE] Something went wrong during simulation")
+                            except KeyError:
+                                res["errors"].append("[ERROR][SIMULATE] Something went wrong during simulation check")
                     else:
-                        try:
-                            stats = self.print_stats()
-                            n_net_inputs = stats["output"]["pi"]
-
-                            if "simulate network: network has {} inputs;".format(n_net_inputs) in v_stdout[0]:
-                                res["errors"].append(v_stdout[0])
-                            else:
-                                res["errors"].append("[ERROR][SIMULATE] Something went wrong during simulation")
-                        except KeyError:
-                            res["errors"].append("[ERROR][SIMULATE] Something went wrong during simulation check")
+                        for error in exec_res["errors"]:
+                            res["errors"].append("[ERROR][SIMULATE] Error during command execution: " + error)
                 else:
-                    for error in exec_res["errors"]:
-                        res["errors"].append("[ERROR][SIMULATE] Error during command execution: " + error)
+                    res["errors"].append("[ERROR][SIMULATE] Invalid inputs (accepted inputs are made of 1s and 0s)")
             else:
                 res["errors"].append("[ERROR][SIMULATE] Can't execute command: "
                                      "SIS has not read any files (use a read command first)")
