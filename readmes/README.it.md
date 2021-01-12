@@ -139,6 +139,10 @@ Tutti i metodi restituiscono un dizionario con:
 [Torna all'indice](#indice)
 
 ## Changelog ![](https://i.imgur.com/SDKHpak.png)
+**Work in progress 1.1.2:** <br>
+### Fix
+* Adesso il metodo ```write_eqn``` viene eseguito quando il comando ```write_eqn``` viene passato al metodo ```parsed_output()```.
+* Quando SIS non e' installato sul computer il messaggio di errore mostra esattamente quale e' il problema
 
 **2021-01-09 1.1.1:** <br>
 ### Fix/funzionalita' aggiuntive
@@ -146,6 +150,10 @@ Tutti i metodi restituiscono un dizionario con:
 anche quando viene inserito un input non valido (caratteri diversi da "0" e/o "1")
 e quando viene eseguito il comando ```sim```
 * ```simulate()``` e ```print_stats()``` puo' gestire correttamente gli output delle FSM (fix:```TypeError: 'NoneType' object is not subscriptable```)
+
+### Bug noti
+* Il comando ```write_blif``` viene eseguito quando si passa il comando ```write_eqn``` al metodo ```parsed_output()```.
+* Quando SIS non e' installato sul computer il messaggio di errore e' incompleto (quindi non facile da capire per l'utente finale)
 
 **2021-01-04 1.1.0:** <br>
 ### Funzionalita' aggiunte

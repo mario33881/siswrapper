@@ -114,7 +114,7 @@ class Siswrapper:
     Shared variables:
     * res: dictionary with results of the start operation (success, errors, stdout)
     * sis: connection to SIS's process
-    * started: boolean that is set to True if the SIS's process is started
+    * started: boolean that is set to True if SIS's process is started
     * readsomething: boolean that is set to True if a correct input has been read by SIS
     """
 
@@ -131,7 +131,7 @@ class Siswrapper:
             self.res["stdout"] = start_res["stdout"]
             self.res["success"] = True
         else:
-            for error in start_res:
+            for error in start_res["errors"]:
                 self.res["errors"].append("[ERROR][INIT] Error while initializing (start step): " + error)
 
     def start(self):
@@ -139,7 +139,7 @@ class Siswrapper:
         Starts SIS's process.
 
         First the method tries to spawn the process.
-        If the process responds with the sis> promt (after some waiting using the wait_end_command() method),
+        If the process responds with the sis> prompt (after some waiting using the wait_end_command() method),
         then the process started correctly.
 
         :return dict res: results of the operation (success, errors, stdout)
@@ -159,11 +159,11 @@ class Siswrapper:
                     res["stdout"] = wait_res["stdout"]
                 else:
                     for error in wait_res["errors"]:
-                        self.res["errors"].append("[ERROR][START] Error while waiting SIS's startup: " + error)
+                        res["errors"].append("[ERROR][START] Error while waiting SIS's startup: " + error)
 
             except pexpect.exceptions.ExceptionPexpect:
                 res["errors"].append("[ERROR][START] Couldn't start SIS: check if "
-                                     "it is installed and callable from the terminal")
+                                     "SIS is installed and callable from the terminal")
         else:
             res["errors"].append("[ERROR][START] Couldn't start SIS: "
                                  "SIS's process is already running in this instance")
@@ -174,7 +174,7 @@ class Siswrapper:
         """
         Resets SIS's process.
 
-        First the method tries to stop the process by calling stop() method
+        First the method tries to stop the process by calling the stop() method
         and then it calls the start() method to start the process.
 
         :return dict res: results of the operation (success, errors, stdout)
@@ -233,7 +233,7 @@ class Siswrapper:
         """
         Waits the end of a command execution.
 
-        It waits for the "sis>" promt to appear.
+        It waits for the "sis>" prompt to appear.
 
         :return dict res: results of the operation (success, errors, stdout)
         """
@@ -257,6 +257,13 @@ class Siswrapper:
     def exec(self, t_command):
         """
         Executes the <t_command> command using SIS.
+
+        TODO: this method should probably call the stop() method
+        when someone executes the "quit" or "exit" command
+        > the advantage of using that method is that the method
+        > checks if SIS's process stopped running.
+        > Currently passing "quit"/"exit" to this method
+        > assumes that the command execution is successfull.
 
         :param str t_command: command to execute using SIS
         :return dict res: results of the operation (success, errors, stdout)
@@ -291,7 +298,7 @@ class Siswrapper:
 
     def parsed_exec(self, t_command):  # noqa: C901
         """
-        Parsed and executes the <t_command> command as best as it thinks it can.
+        Parses and executes the <t_command> command as best as it thinks it can.
 
         First it tries to find the correct method to call to execute the command.
         If this method doesn't find the best method for that command, it is
@@ -345,7 +352,7 @@ class Siswrapper:
         elif re.match(r"^write_eqn [\s]*(\S*)$", strip_cmd):
             param = re.match(r"^write_eqn [\s]*(\S*)$", strip_cmd).groups()[0]
             param = param.strip('"')
-            cmd_res = self.write_blif(param)
+            cmd_res = self.write_eqn(param)
 
         # source script.rugged
         elif strip_cmd == "source script.rugged":
