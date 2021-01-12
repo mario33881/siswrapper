@@ -57,13 +57,13 @@ to control interactive shells by spawning and connecting to their process.
 ## Installation
 You can install this library by:
 
-1. Running the following pip command:
+* (Easiest) Running the following pip command:
 
     ```
     pip install siswrapper
     ```
 
-2. Build the python wheel file using the following command:
+* Build the python wheel file using the following command:
 
     ```
     python3 setup.py bdist_wheel

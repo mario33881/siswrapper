@@ -58,13 +58,13 @@ attraverso un processo eseguito in background.
 ## Installazione
 Puoi installare questa libreria nei seguenti modi:
 
-1. Eseguendo il comando pip qui sotto:
+* (Metodo piu' semplice) Eseguendo il comando pip qui sotto:
 
     ```
     pip install siswrapper
     ```
 
-2. Eseguire la build della wheel python utilizzando il comando seguente:
+* Eseguire la build della wheel python utilizzando il comando seguente:
 
     ```
     python3 setup.py bdist_wheel
