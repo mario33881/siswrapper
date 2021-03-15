@@ -116,6 +116,7 @@ class Siswrapper:
     * sis: connection to SIS's process
     * started: boolean that is set to True if SIS's process is started
     * readsomething: boolean that is set to True if a correct input has been read by SIS
+    * read_path: string that contains the path of the read input file
     """
 
     def __init__(self):
@@ -123,6 +124,7 @@ class Siswrapper:
         self.sis = None
         self.started = False
         self.readsomething = False
+        self.read_path = None
 
         start_res = self.start()
 
@@ -371,6 +373,36 @@ class Siswrapper:
             param = re.match(r"^sim [\s]*(.*)$", strip_cmd).groups()[0]
             cmd_res = self.simulate(param)
 
+        # bsis_script command
+        elif strip_cmd.startswith("bsis_script"):
+            param = strip_cmd.replace("bsis_script", "").strip()
+            if param == "fsm_autoencoding_area":
+                cmd_res = self.bsisscript_fsm(autoencoding=True, opt_area=True)
+            elif param == "fsm_autoencoding_delay":
+                cmd_res =  self.bsisscript_fsm(autoencoding=True, opt_area=False)
+            elif param == "fsm_area":
+                cmd_res = self.bsisscript_fsm(autoencoding=False, opt_area=True)
+            elif param == "fsm_delay":
+                cmd_res = self.bsisscript_fsm(autoencoding=False, opt_area=False)
+            elif param == "lgate_area_mcnc":
+                cmd_res = self.bsisscript_lgate(opt_area=True, library="mcnc")
+            elif param == "lgate_delay_mcnc":
+                cmd_res = self.bsisscript_lgate(opt_area=False, library="mcnc")
+            elif param == "lgate_area_synch":
+                cmd_res = self.bsisscript_lgate(opt_area=True, library="synch")
+            elif param == "lgate_delay_synch":
+                cmd_res = self.bsisscript_lgate(opt_area=False, library="synch")
+            elif param == "fsmd_area":
+                cmd_res = self.bsisscript_fsmd(opt_area=True)
+            elif param == "fsmd_delay":
+                cmd_res = self.bsisscript_fsmd(opt_area=False)
+            else:
+                cmd_res = {"success": False, "errors": ["[ERROR][BSIS_SCRIPT] Unexpected bsis_script parameter"], "stdout": None}
+
+        # stg_to_network
+        elif strip_cmd == "stg_to_network":
+            cmd_res = self.stg_to_network()
+
         # command not found... execute it
         else:
             cmd_res = self.exec(strip_cmd)
@@ -422,6 +454,7 @@ class Siswrapper:
 
             if t_changedir:
                 os.chdir(blif_path)
+                self.reset()
 
             if os.path.isfile(blif_fullpath):
                 if t_append:
@@ -447,9 +480,11 @@ class Siswrapper:
                         if not found_errors:
                             res["success"] = True
                             self.readsomething = True
+                            self.read_path = blif_fullpath
                     else:
                         res["success"] = True
                         self.readsomething = True
+                        self.read_path = blif_fullpath
                 else:
                     for error in exec_res["errors"]:
                         res["errors"].append("[ERROR][READ_BLIF] Error during execution: " + error)
@@ -476,6 +511,7 @@ class Siswrapper:
 
             if t_changedir:
                 os.chdir(eqn_path)
+                self.reset()
 
             if os.path.isfile(eqn_fullpath):
                 if t_append:
@@ -501,9 +537,11 @@ class Siswrapper:
                         if not found_errors:
                             res["success"] = True
                             self.readsomething = True
+                            self.read_path = eqn_fullpath
                     else:
                         res["success"] = True
                         self.readsomething = True
+                        self.read_path = eqn_fullpath
                 else:
                     for error in exec_res["errors"]:
                         res["errors"].append("[ERROR][READ_EQN] Error during execution: " + error)
@@ -532,7 +570,15 @@ class Siswrapper:
 
         if self.started:
             if self.readsomething:
-                exec_res = self.exec('write_blif ' + t_params + ' ' + t_file)
+                
+                if t_file == "" and t_params == "":
+                    exec_res = self.exec('write_blif')
+                elif t_params == "" and t_file != "":
+                    exec_res = self.exec('write_blif ' + t_file)
+                elif t_params != "" and t_file == "":
+                    exec_res = self.exec('write_blif ' + t_params)
+                else:
+                    exec_res = self.exec('write_blif ' + t_params + ' ' + t_file)
 
                 res["stdout"] = exec_res["stdout"]
 
@@ -567,7 +613,15 @@ class Siswrapper:
 
         if self.started:
             if self.readsomething:
-                exec_res = self.exec('write_eqn ' + t_params + ' ' + t_file)
+
+                if t_file == "" and t_params == "":
+                    exec_res = self.exec('write_eqn')
+                elif t_params == "" and t_file != "":
+                    exec_res = self.exec('write_eqn ' + t_file)
+                elif t_params != "" and t_file == "":
+                    exec_res = self.exec('write_eqn ' + t_params)
+                else:
+                    exec_res = self.exec('write_eqn ' + t_params + ' ' + t_file)
 
                 res["stdout"] = exec_res["stdout"]
 
@@ -605,19 +659,419 @@ class Siswrapper:
         res = {"success": False, "errors": [], "stdout": None}
 
         if self.started:
-            exec_res = self.exec("source script.rugged")
-            if exec_res["success"]:
-                res["stdout"] = exec_res["stdout"]
+            if self.readsomething:
+                exec_res = self.exec("source script.rugged")
+                if exec_res["success"]:
+                    res["stdout"] = exec_res["stdout"]
 
-                if res["stdout"] is None:
-                    res["success"] = True
+                    if res["stdout"] is None:
+                        res["success"] = True
+                else:
+                    for error in exec_res["errors"]:
+                        res["errors"].append("[ERROR][SCRIPT_RUGGED] Error during execution: " + error)
             else:
-                for error in exec_res["errors"]:
-                    res["errors"].append("[ERROR][SCRIPT_RUGGED] Error during execution: " + error)
+                res["errors"].append("[ERROR][SCRIPT_RUGGED] Nothing to optimize "
+                                     "(missing an input, use read_blif or another read command)")
         else:
             res["errors"].append("[ERROR][SCRIPT_RUGGED] Can't execute command: SIS's process is not running")
 
         return res
+
+    def bsisscript_fsm(self, autoencoding, opt_area):
+        """
+        Executes many commands to optimize and map an FSM using SIS.
+
+        * state_minimize stamina
+        * state_assign jedi / stg_to_network (autoencoding True/False)
+        * reduce_depth if opt_area is False
+        * source script.rugged
+        * read_library synch.genlib
+        * map -m 0 -W -s / map -n 1 -W -s (opt_area True/False)
+
+        :param bool autoencoding: True = automatically encodes states
+        :param bool opt_area: True = optimize area, False = optimize delay
+        :return dict res: results of the operation (success, output, errors, stdout)
+        """
+        res = {"success": True, "output": {}, "errors": [], "stdout": ""}
+
+        newfile_path = os.path.dirname(self.read_path)
+        
+        newfile_name = os.path.basename(self.read_path)
+        newfile_name = removesuffix(newfile_name, ".blif")
+        newfile_name += ".{}.blif"
+
+        newfile_fullpath = os.path.join(newfile_path, newfile_name)
+
+        if self.started:
+            if self.readsomething:
+                
+                # print_stats
+                cmd_res = self.print_stats()
+                res["stdout"] += "sis> print_stats\n"
+
+                for error in cmd_res["errors"]:
+                    res["errors"].append(error)
+
+                if cmd_res["output"]:
+                    res["output"]["1_initial_stats"] = cmd_res["output"]
+
+                if cmd_res["stdout"]:
+                    res["stdout"] += "\n" + cmd_res["stdout"] + "\n"
+
+                if not cmd_res["success"]:
+                    res["success"] = False
+
+                # state_minimize stamina
+                cmd_res = self.parsed_exec("state_minimize stamina")
+                res["stdout"] += "sis> state_minimize stamina\n"
+
+                for error in cmd_res["errors"]:
+                    res["errors"].append(error)
+
+                if cmd_res["stdout"]:
+                    res["stdout"] += "\n" + cmd_res["stdout"] + "\n"
+
+                if not cmd_res["success"]:
+                    res["success"] = False
+
+                # state_assign / stg_to_network
+                if autoencoding:
+                    cmd_res = self.parsed_exec("state_assign jedi")
+                    res["stdout"] += "sis> state_assign jedi\n"
+                else:
+                    cmd_res = self.parsed_exec("stg_to_network")
+                    res["stdout"] += "sis> stg_to_network\n"
+
+                for error in cmd_res["errors"]:
+                    res["errors"].append(error)
+
+                if cmd_res["stdout"]:
+                    res["stdout"] += "\n" + cmd_res["stdout"] + "\n"
+
+                if not cmd_res["success"]:
+                    res["success"] = False
+
+                # print_stats
+                cmd_res = self.print_stats()
+                res["stdout"] += "sis> print_stats\n"
+
+                for error in cmd_res["errors"]:
+                    res["errors"].append(error)
+
+                if cmd_res["output"]:
+                    res["output"]["2_optimized_states"] = cmd_res["output"]
+
+                if cmd_res["stdout"]:
+                    res["stdout"] += "\n" + cmd_res["stdout"] + "\n"
+
+                if not cmd_res["success"]:
+                    res["success"] = False
+
+                self.write_blif(newfile_fullpath.format("state_min_encoding"))
+
+                # reduce_depth (if opt_area is False)
+                if not opt_area:
+                    cmd_res = self.parsed_exec("reduce_depth")
+                    
+                    res["stdout"] += "sis> reduce_depth\n"
+                    
+                    for error in cmd_res["errors"]:
+                        res["errors"].append(error)
+
+                    if cmd_res["stdout"]:
+                        res["stdout"] += "\n" + cmd_res["stdout"] + "\n"
+
+                    if not cmd_res["success"]:
+                        res["success"] = False
+
+                    # print_stats
+                    cmd_res = self.print_stats()
+                    res["stdout"] += "sis> print_stats\n"
+
+                    for error in cmd_res["errors"]:
+                        res["errors"].append(error)
+
+                    if cmd_res["output"]:
+                        res["output"]["3_reduce_depth_stats"] = cmd_res["output"]
+
+                    if cmd_res["stdout"]:
+                        res["stdout"] += "\n" + cmd_res["stdout"] + "\n"
+
+                    if not cmd_res["success"]:
+                        res["success"] = False
+
+                # script.rugged
+                cmd_res = self.parsed_exec("source script.rugged")
+                res["stdout"] += "sis> source script.rugged\n"
+
+                for error in cmd_res["errors"]:
+                    res["errors"].append(error)
+
+                if cmd_res["stdout"]:
+                    res["stdout"] += "\n" + cmd_res["stdout"] + "\n"
+
+                if not cmd_res["success"]:
+                    res["success"] = False
+
+                # print_stats
+                cmd_res = self.print_stats()
+                res["stdout"] += "sis> print_stats\n"
+
+                for error in cmd_res["errors"]:
+                    res["errors"].append(error)
+
+                if cmd_res["output"]:
+                    res["output"]["4_rugged_stats"] = cmd_res["output"]
+
+                if cmd_res["stdout"]:
+                    res["stdout"] += "\n" + cmd_res["stdout"] + "\n"
+
+                if not cmd_res["success"]:
+                    res["success"] = False
+
+                self.write_blif(newfile_fullpath.format("optimized"))
+
+                # read_library
+                cmd_res = self.parsed_exec("read_library synch.genlib")
+                res["stdout"] += "sis> read_library synch.genlib\n"
+
+                for error in cmd_res["errors"]:
+                    res["errors"].append(error)
+
+                if cmd_res["stdout"]:
+                    res["stdout"] += "\n" + cmd_res["stdout"] + "\n"
+
+                if not cmd_res["success"]:
+                    res["success"] = False
+
+                # map
+                if opt_area:
+                    cmd_res = self.parsed_exec("map -m 0 -W -s")
+                    res["stdout"] += "sis> map -m 0 -W -s\n"
+                else:
+                    cmd_res = self.parsed_exec("map -n 1 -W -s")
+                    res["stdout"] += "sis> map -n 1 -W -s\n"
+
+                for error in cmd_res["errors"]:
+                    res["errors"].append(error)
+
+                if cmd_res["stdout"]:
+                    res["stdout"] += "\n" + cmd_res["stdout"] + "\n"
+
+                if not cmd_res["success"]:
+                    res["success"] = False
+                
+                # print_stats
+                cmd_res = self.print_stats()
+                res["stdout"] += "sis> print_stats\n"
+
+                for error in cmd_res["errors"]:
+                    res["errors"].append(error)
+
+                if cmd_res["output"]:
+                    res["output"]["5_map_stats"] = cmd_res["output"]
+
+                if cmd_res["stdout"]:
+                    res["stdout"] += "\n" + cmd_res["stdout"] + "\n"
+
+                if not cmd_res["success"]:
+                    res["success"] = False
+                
+                self.write_blif(newfile_fullpath.format("mapped"))
+
+            else:
+                res["success"] = False
+                res["errors"].append("[ERROR][BSISSCRIPT_FSM] Nothing to optimize and map "
+                                     "(missing an input, use read_blif or another read command)")
+        else:
+            # SIS is not running
+            res["success"] = False
+            res["errors"].append("[ERROR][BSISSCRIPT_FSM] Can't execute command: SIS's process is not running")
+
+        return res
+
+    def bsisscript_lgate(self, opt_area, library):
+        """
+        Executes many commands to optimize and map a combinational circuit using SIS.
+
+        * reduce_depth if opt_area is False
+        * source script.rugged
+        * read_library synch.genlib / read_library mcnc.genlib (library synch/mcnc)
+        * map -m 0 -W -s / map -n 1 -W -s (opt_area True/False)
+
+        :param bool opt_area: True = optimize area, False = optimize delay
+        :param str library: mcnc = mcnc.genlib, synch = synch.genlib
+        :return dict res: results of the operation (success, output, errors, stdout)
+        """
+        res = {"success": True, "output": {}, "errors": [], "stdout": ""}
+
+        newfile_path = os.path.dirname(self.read_path)
+        
+        newfile_name = os.path.basename(self.read_path)
+        newfile_name = removesuffix(newfile_name, ".blif")
+        newfile_name += ".{}.blif"
+
+        newfile_fullpath = os.path.join(newfile_path, newfile_name)
+        
+        if self.started:
+            if self.readsomething:
+                # print_stats
+                cmd_res = self.print_stats()
+                res["stdout"] += "sis> print_stats\n"
+
+                for error in cmd_res["errors"]:
+                    res["errors"].append(error)
+
+                if cmd_res["output"]:
+                    res["output"]["1_initial_stats"] = cmd_res["output"]
+
+                if cmd_res["stdout"]:
+                    res["stdout"] += "\n" + cmd_res["stdout"] + "\n"
+
+                if not cmd_res["success"]:
+                    res["success"] = False
+
+                # reduce_depth (if opt_area is False)
+                if not opt_area:
+                    cmd_res = self.parsed_exec("reduce_depth")
+                    
+                    res["stdout"] += "sis> reduce_depth\n"
+                    
+                    for error in cmd_res["errors"]:
+                        res["errors"].append(error)
+
+                    if cmd_res["stdout"]:
+                        res["stdout"] += "\n" + cmd_res["stdout"] + "\n"
+
+                    if not cmd_res["success"]:
+                        res["success"] = False
+                    
+                    # print_stats
+                    cmd_res = self.print_stats()
+                    res["stdout"] += "sis> print_stats\n"
+
+                    for error in cmd_res["errors"]:
+                        res["errors"].append(error)
+
+                    if cmd_res["output"]:
+                        res["output"]["2_reduce_depth_stats"] = cmd_res["output"]
+
+                    if cmd_res["stdout"]:
+                        res["stdout"] += "\n" + cmd_res["stdout"] + "\n"
+
+                    if not cmd_res["success"]:
+                        res["success"] = False
+                
+                # script.rugged
+                cmd_res = self.parsed_exec("source script.rugged")
+                res["stdout"] += "sis> source script.rugged\n"
+
+                for error in cmd_res["errors"]:
+                    res["errors"].append(error)
+
+                if cmd_res["stdout"]:
+                    res["stdout"] += "\n" + cmd_res["stdout"] + "\n"
+
+                if not cmd_res["success"]:
+                    res["success"] = False
+                
+                # print_stats
+                cmd_res = self.print_stats()
+                res["stdout"] += "sis> print_stats\n"
+
+                for error in cmd_res["errors"]:
+                    res["errors"].append(error)
+
+                if cmd_res["output"]:
+                    res["output"]["3_rugged_stats"] = cmd_res["output"]
+
+                if cmd_res["stdout"]:
+                    res["stdout"] += "\n" + cmd_res["stdout"] + "\n"
+
+                if not cmd_res["success"]:
+                    res["success"] = False
+
+                self.write_blif(newfile_fullpath.format("optimized"))
+
+                # read_library
+                if library == "synch":
+                    cmd_res = self.parsed_exec("read_library synch.genlib")
+                    res["stdout"] += "sis> read_library synch.genlib\n"
+                elif library == "mcnc":
+                    cmd_res = self.parsed_exec("read_library mcnc.genlib")
+                    res["stdout"] += "sis> read_library mcnc.genlib\n"
+                else:
+                    cmd_res = {"success": False, "errors": ["[ERROR][BSISSCRIPT_LGATE] library '{}' doesn't exist".format(library)], "stdout": None}
+                    res["stdout"] += "sis> read_library {}\n".format(library)
+
+                for error in cmd_res["errors"]:
+                    res["errors"].append(error)
+
+                if cmd_res["stdout"]:
+                    res["stdout"] += "\n" + cmd_res["stdout"] + "\n"
+
+                if not cmd_res["success"]:
+                    res["success"] = False
+
+                # map
+                if opt_area:
+                    cmd_res = self.parsed_exec("map -m 0 -W -s")
+                    res["stdout"] += "sis> map -m 0 -W -s\n"
+                else:
+                    cmd_res = self.parsed_exec("map -n 1 -W -s")
+                    res["stdout"] += "sis> map -n 1 -W -s\n"
+
+                for error in cmd_res["errors"]:
+                    res["errors"].append(error)
+
+                if cmd_res["stdout"]:
+                    res["stdout"] += "\n" + cmd_res["stdout"] + "\n"
+
+                if not cmd_res["success"]:
+                    res["success"] = False
+                
+                # print_stats
+                cmd_res = self.print_stats()
+                res["stdout"] += "sis> print_stats\n"
+
+                for error in cmd_res["errors"]:
+                    res["errors"].append(error)
+
+                if cmd_res["output"]:
+                    res["output"]["4_map_stats"] = cmd_res["output"]
+
+                if cmd_res["stdout"]:
+                    res["stdout"] += "\n" + cmd_res["stdout"] + "\n"
+
+                if not cmd_res["success"]:
+                    res["success"] = False
+
+                self.write_blif(newfile_fullpath.format("mapped"))
+            else:
+                res["success"] = False
+                res["errors"].append("[ERROR][BSISSCRIPT_LGATE] Nothing to optimize and map "
+                                     "(missing an input, use read_blif or another read command)")
+        else:
+            # SIS is not running
+            res["success"] = False
+            res["errors"].append("[ERROR][BSISSCRIPT_LGATE] Can't execute command: SIS's process is not running")
+            
+        return res
+
+    def bsisscript_fsmd(self, opt_area):
+        """
+        Executes many commands to optimize a FSMD circuit using SIS by calling the bsisscript_lgate method.
+
+        * reduce_depth if opt_area is False
+        * source script.rugged
+        * read_library synch.genlib
+        * map -m 0 -W -s / map -n 1 -W -s (opt_area True/False)
+
+        :param bool opt_area: True = optimize area, False = optimize delay
+        :return dict res: results of the operation (success, output, errors, stdout)
+        """
+        cmd_res = self.bsisscript_lgate(opt_area, "synch")
+        return cmd_res
 
     # ====================================================================================================
     #
@@ -690,6 +1144,39 @@ class Siswrapper:
                                      "SIS has not read any files (use a read command first)")
         else:
             res["errors"].append("[ERROR][PRINT_STATS] Can't execute command: SIS's process is not running")
+
+        return res
+
+    # ====================================================================================================
+    #
+    #                                          FSM METHODS
+    #
+    # ====================================================================================================
+
+    def stg_to_network(self):
+        """
+        Executes SIS' stg_to_network command which converts an FSM to a nodes network.
+
+        :return dict res: results of the operation (success, errors, stdout)
+        """
+        res = {"success": False, "errors": [], "stdout": None}
+
+        if self.started:
+            if self.readsomething:
+                exec_res = self.exec("stg_to_network")
+                if exec_res["success"]:
+                    res["stdout"] = exec_res["stdout"]
+
+                    if res["stdout"] is None:
+                        res["success"] = True
+                else:
+                    for error in exec_res["errors"]:
+                        res["errors"].append("[ERROR][STG_TO_NETWORK] Error during execution: " + error)
+            else:
+                res["errors"].append("[ERROR][STG_TO_NETWORK] Nothing to convert into a network "
+                                     "(missing an input, use read_blif or another read command)")
+        else:
+            res["errors"].append("[ERROR][STG_TO_NETWORK] Can't execute command: SIS's process is not running")
 
         return res
 

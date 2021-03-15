@@ -267,13 +267,37 @@ class TestSiswrapper(unittest.TestCase):
     #
     # ====================================================================================================
 
-    @unittest.skip("TODO: write tests")
     def test_write_blif(self):
-        pass
+        """
+        Tests the write_blif command.
+        """
+        file_path = os.path.join(curr_dir, "and.blif")
 
-    @unittest.skip("TODO: write tests")
+        with open(file_path, "r") as f:
+            and_content = f.read().replace("\n", "\r\n")
+
+        res = self.sw_session.read_blif(file_path)
+        self.assertTrue(res["success"], "action should be successful")
+        
+        res = self.sw_session.write_blif()
+        self.assertTrue(res["success"], "action should be successful")
+        self.assertEqual(res["stdout"].strip(), and_content.strip())
+
     def test_write_eqn(self):
-        pass
+        """
+        Tests the write_eqn command.
+        """
+        file_path = os.path.join(curr_dir, "and.eqn")
+
+        with open(file_path, "r") as f:
+            and_content = f.read().replace("\n", "\r\n")
+
+        res = self.sw_session.read_eqn(file_path)
+        self.assertTrue(res["success"], "action should be successful")
+        
+        res = self.sw_session.write_eqn()
+        self.assertTrue(res["success"], "action should be successful")
+        self.assertEqual(res["stdout"].strip(), and_content.strip())
 
     # ====================================================================================================
     #
@@ -284,6 +308,41 @@ class TestSiswrapper(unittest.TestCase):
     @unittest.skip("TODO: write tests")
     def test_script_rugged(self):
         pass
+    
+    @unittest.skip("TODO: write tests")
+    def test_bsisscript_fsm(self):
+        pass
+    
+    @unittest.skip("TODO: write tests")
+    def test_bsisscript_lgate(self):
+        pass
+
+    @unittest.skip("TODO: write tests")
+    def test_bsisscript_fsmd(self):
+        pass
+
+    # ====================================================================================================
+    #
+    #                                          FSM METHODS
+    #
+    # ====================================================================================================
+
+    def test_stg_to_network(self):
+        # FSM with encoding
+        file_path = os.path.join(curr_dir, "automa.blif")
+        cmd_res = self.sw_session.read_blif(file_path)
+        self.assertTrue(cmd_res["success"], "read_blif execution should be successfull")
+
+        cmd_res = self.sw_session.stg_to_network()
+        self.assertTrue(cmd_res["success"], "stg_to_network execution should be successfull")
+
+        # same FSM but without encoding
+        file_path = os.path.join(curr_dir, "automa_noencoding.blif")
+        cmd_res = self.sw_session.read_blif(file_path)
+        self.assertTrue(cmd_res["success"], "read_blif execution should be successfull")
+
+        cmd_res = self.sw_session.stg_to_network()
+        self.assertFalse(cmd_res["success"], "stg_to_network execution should fail")
 
     # ====================================================================================================
     #
