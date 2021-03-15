@@ -95,7 +95,7 @@ class TestUtils(unittest.TestCase):
 
             res = sw.str_to_numbers(test["i"])
             self.assertEqual(res, test["o"], "error during test: \"{}\"".format(test))
-    
+
     @unittest.skip("TODO: write tests")
     def test_removeprefix(self):
         pass
@@ -278,7 +278,7 @@ class TestSiswrapper(unittest.TestCase):
 
         res = self.sw_session.read_blif(file_path)
         self.assertTrue(res["success"], "action should be successful")
-        
+
         res = self.sw_session.write_blif()
         self.assertTrue(res["success"], "action should be successful")
         self.assertEqual(res["stdout"].strip(), and_content.strip())
@@ -294,7 +294,7 @@ class TestSiswrapper(unittest.TestCase):
 
         res = self.sw_session.read_eqn(file_path)
         self.assertTrue(res["success"], "action should be successful")
-        
+
         res = self.sw_session.write_eqn()
         self.assertTrue(res["success"], "action should be successful")
         self.assertEqual(res["stdout"].strip(), and_content.strip())
@@ -308,11 +308,11 @@ class TestSiswrapper(unittest.TestCase):
     @unittest.skip("TODO: write tests")
     def test_script_rugged(self):
         pass
-    
+
     @unittest.skip("TODO: write tests")
     def test_bsisscript_fsm(self):
         pass
-    
+
     @unittest.skip("TODO: write tests")
     def test_bsisscript_lgate(self):
         pass
@@ -355,7 +355,7 @@ class TestSiswrapper(unittest.TestCase):
         file_path = os.path.join(curr_dir, "and.blif")
         cmd_res = self.sw_session.read_blif(file_path)
         self.assertTrue(cmd_res["success"], "read_blif execution should be successfull")
-        
+
         cmd_res = self.sw_session.print_stats()
 
         self.assertTrue(cmd_res["success"], "print_stats execution should be successfull")
@@ -371,7 +371,7 @@ class TestSiswrapper(unittest.TestCase):
         file_path = os.path.join(curr_dir, "automa.blif")
         cmd_res = self.sw_session.read_blif(file_path)
         self.assertTrue(cmd_res["success"], "read_blif execution should be successfull")
-        
+
         cmd_res = self.sw_session.print_stats()
 
         self.assertTrue(cmd_res["success"], "print_stats execution should be successfull")

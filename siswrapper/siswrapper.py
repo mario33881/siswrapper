@@ -379,7 +379,7 @@ class Siswrapper:
             if param == "fsm_autoencoding_area":
                 cmd_res = self.bsisscript_fsm(autoencoding=True, opt_area=True)
             elif param == "fsm_autoencoding_delay":
-                cmd_res =  self.bsisscript_fsm(autoencoding=True, opt_area=False)
+                cmd_res = self.bsisscript_fsm(autoencoding=True, opt_area=False)
             elif param == "fsm_area":
                 cmd_res = self.bsisscript_fsm(autoencoding=False, opt_area=True)
             elif param == "fsm_delay":
@@ -397,7 +397,9 @@ class Siswrapper:
             elif param == "fsmd_delay":
                 cmd_res = self.bsisscript_fsmd(opt_area=False)
             else:
-                cmd_res = {"success": False, "errors": ["[ERROR][BSIS_SCRIPT] Unexpected bsis_script parameter"], "stdout": None}
+                cmd_res = {"success": False,
+                           "errors": ["[ERROR][BSIS_SCRIPT] Unexpected bsis_script parameter"],
+                           "stdout": None}
 
         # stg_to_network
         elif strip_cmd == "stg_to_network":
@@ -570,7 +572,7 @@ class Siswrapper:
 
         if self.started:
             if self.readsomething:
-                
+
                 if t_file == "" and t_params == "":
                     exec_res = self.exec('write_blif')
                 elif t_params == "" and t_file != "":
@@ -677,7 +679,7 @@ class Siswrapper:
 
         return res
 
-    def bsisscript_fsm(self, autoencoding, opt_area):
+    def bsisscript_fsm(self, autoencoding, opt_area):  # noqa: C901
         """
         Executes many commands to optimize and map an FSM using SIS.
 
@@ -695,7 +697,7 @@ class Siswrapper:
         res = {"success": True, "output": {}, "errors": [], "stdout": ""}
 
         newfile_path = os.path.dirname(self.read_path)
-        
+
         newfile_name = os.path.basename(self.read_path)
         newfile_name = removesuffix(newfile_name, ".blif")
         newfile_name += ".{}.blif"
@@ -704,7 +706,7 @@ class Siswrapper:
 
         if self.started:
             if self.readsomething:
-                
+
                 # print_stats
                 cmd_res = self.print_stats()
                 res["stdout"] += "sis> print_stats\n"
@@ -772,9 +774,9 @@ class Siswrapper:
                 # reduce_depth (if opt_area is False)
                 if not opt_area:
                     cmd_res = self.parsed_exec("reduce_depth")
-                    
+
                     res["stdout"] += "sis> reduce_depth\n"
-                    
+
                     for error in cmd_res["errors"]:
                         res["errors"].append(error)
 
@@ -860,7 +862,7 @@ class Siswrapper:
 
                 if not cmd_res["success"]:
                     res["success"] = False
-                
+
                 # print_stats
                 cmd_res = self.print_stats()
                 res["stdout"] += "sis> print_stats\n"
@@ -876,7 +878,7 @@ class Siswrapper:
 
                 if not cmd_res["success"]:
                     res["success"] = False
-                
+
                 self.write_blif(newfile_fullpath.format("mapped"))
 
             else:
@@ -890,7 +892,7 @@ class Siswrapper:
 
         return res
 
-    def bsisscript_lgate(self, opt_area, library):
+    def bsisscript_lgate(self, opt_area, library):  # noqa: C901
         """
         Executes many commands to optimize and map a combinational circuit using SIS.
 
@@ -906,13 +908,13 @@ class Siswrapper:
         res = {"success": True, "output": {}, "errors": [], "stdout": ""}
 
         newfile_path = os.path.dirname(self.read_path)
-        
+
         newfile_name = os.path.basename(self.read_path)
         newfile_name = removesuffix(newfile_name, ".blif")
         newfile_name += ".{}.blif"
 
         newfile_fullpath = os.path.join(newfile_path, newfile_name)
-        
+
         if self.started:
             if self.readsomething:
                 # print_stats
@@ -934,9 +936,9 @@ class Siswrapper:
                 # reduce_depth (if opt_area is False)
                 if not opt_area:
                     cmd_res = self.parsed_exec("reduce_depth")
-                    
+
                     res["stdout"] += "sis> reduce_depth\n"
-                    
+
                     for error in cmd_res["errors"]:
                         res["errors"].append(error)
 
@@ -945,7 +947,7 @@ class Siswrapper:
 
                     if not cmd_res["success"]:
                         res["success"] = False
-                    
+
                     # print_stats
                     cmd_res = self.print_stats()
                     res["stdout"] += "sis> print_stats\n"
@@ -961,7 +963,7 @@ class Siswrapper:
 
                     if not cmd_res["success"]:
                         res["success"] = False
-                
+
                 # script.rugged
                 cmd_res = self.parsed_exec("source script.rugged")
                 res["stdout"] += "sis> source script.rugged\n"
@@ -974,7 +976,7 @@ class Siswrapper:
 
                 if not cmd_res["success"]:
                     res["success"] = False
-                
+
                 # print_stats
                 cmd_res = self.print_stats()
                 res["stdout"] += "sis> print_stats\n"
@@ -1001,7 +1003,9 @@ class Siswrapper:
                     cmd_res = self.parsed_exec("read_library mcnc.genlib")
                     res["stdout"] += "sis> read_library mcnc.genlib\n"
                 else:
-                    cmd_res = {"success": False, "errors": ["[ERROR][BSISSCRIPT_LGATE] library '{}' doesn't exist".format(library)], "stdout": None}
+                    cmd_res = {"success": False,
+                               "errors": ["[ERROR][BSISSCRIPT_LGATE] library '{}' doesn't exist".format(library)],
+                               "stdout": None}
                     res["stdout"] += "sis> read_library {}\n".format(library)
 
                 for error in cmd_res["errors"]:
@@ -1029,7 +1033,7 @@ class Siswrapper:
 
                 if not cmd_res["success"]:
                     res["success"] = False
-                
+
                 # print_stats
                 cmd_res = self.print_stats()
                 res["stdout"] += "sis> print_stats\n"
@@ -1055,7 +1059,7 @@ class Siswrapper:
             # SIS is not running
             res["success"] = False
             res["errors"].append("[ERROR][BSISSCRIPT_LGATE] Can't execute command: SIS's process is not running")
-            
+
         return res
 
     def bsisscript_fsmd(self, opt_area):
@@ -1186,7 +1190,7 @@ class Siswrapper:
     #
     # ====================================================================================================
 
-    def simulate(self, inputs):
+    def simulate(self, inputs):  # noqa: C901
         """
         Executes SIS' simulate command to simulate a circuit.
 
