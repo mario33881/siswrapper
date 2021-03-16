@@ -1104,8 +1104,8 @@ class Siswrapper:
                                   r"*nodes=[\s]*(\d*)[\s]*latches=[\s]*(\d*)[\s]*$"
                         infos = v_stdout[0]
                         lits_states = v_stdout[1]
-                        mlits = re.match(r"lits\(sop\)= [\s]*(\d*).*", lits_states)
-                        mstates = re.match(r".*#states\(STG\)= [\s]*(\d*)", lits_states)
+                        mlits = re.match(r"lits\(sop\)=[\s]*(\d*).*", lits_states)
+                        mstates = re.match(r".*#states\(STG\)=[\s]*(\d*)", lits_states)
                         minfos = re.match(pattern, infos)
                         if minfos and mlits:
                             try:
@@ -1115,11 +1115,11 @@ class Siswrapper:
                                 po = int(infosgroups[2])
                                 nodes = int(infosgroups[3])
                                 latches = int(infosgroups[4])
-                                int_lits = int(mlits.groups()[0])
+                                int_lits = int(mlits.groups()[0].strip())
                                 states = 0
 
                                 if mstates:
-                                    states = mstates.groups()[0]
+                                    states = mstates.groups()[0].strip()
                                     states = int(states)
 
                                 res["output"] = {

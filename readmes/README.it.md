@@ -139,6 +139,10 @@ Tutti i metodi restituiscono un dizionario con:
 [Torna all'indice](#indice)
 
 ## Changelog ![](https://i.imgur.com/SDKHpak.png)
+**2021-03-16 1.2.1:** <br>
+### Fix
+* Il comando ```print_stats``` falliva il parsing dell'output del comando print_stats quando il circuito aveva piu' di 10000 letterali/stati
+
 **2021-03-16 1.2.0:** <br>
 ### Funzionalita' aggiunte
 * Aggiunto il comando ```bsis_script``` command. I suoi parametri sono:

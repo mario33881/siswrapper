@@ -138,6 +138,10 @@ All the methods return a dictionary with:
 [Go to the index](#index)
 
 ## Changelog ![](https://i.imgur.com/SDKHpak.png)
+**2021-03-16 1.2.1:** <br>
+### Fixes
+* the ```print_stats``` method failed the print_stats command output parsing when the circuit had 10000 literals/states or more
+
 **2021-03-16 1.2.0:** <br>
 ### Features
 * Added ```bsis_script``` command. Its accepted parameters are:
