@@ -138,7 +138,7 @@ All the methods return a dictionary with:
 [Go to the index](#index)
 
 ## Changelog ![](https://i.imgur.com/SDKHpak.png)
-**WIP 1.2.0:** <br>
+**2021-03-16 1.2.0:** <br>
 ### Features
 * Added ```bsis_script``` command. Its accepted parameters are:
     * ```fsm_autoencoding_area```, useful for FSM circuits: minimizes states, automatically encodes states, optimizes area and maps the circuit by area (synch library)
@@ -151,7 +151,7 @@ All the methods return a dictionary with:
         > Executed commands: ```state_minimize stamina```, ```stg_to_network```, ```reduce_depth```, ```source script.rugged```, ```read_library synch.genlib```, ```map -n 1 -W -s```
     * ```lgate_area_mcnc```, useful for combinational circuits: optimizes area and maps the circuit by area (mcnc library)
         > Executed commands: ```source script.rugged```, ```read_library mcnc.genlib```, ```map -m 0 -W -s```
-    * ```lgate_delay_mcnc``, useful for combinational circuits`: optimizes delay and maps the circuit by delay (mcnc library)
+    * ```lgate_delay_mcnc```, useful for combinational circuits: optimizes delay and maps the circuit by delay (mcnc library)
         > Executed commands: ```reduce_depth```, ```source script.rugged```, ```read_library mcnc.genlib```, ```map -n 1 -W -s```
     * ```lgate_area_synch```, useful for combinational circuits: optimizes area and maps the circuit by area (synch library)
         > Executed commands: ```source script.rugged```, ```read_library synch.genlib```, ```map -m 0 -W -s```

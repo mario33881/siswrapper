@@ -139,7 +139,7 @@ Tutti i metodi restituiscono un dizionario con:
 [Torna all'indice](#indice)
 
 ## Changelog ![](https://i.imgur.com/SDKHpak.png)
-**WIP 1.2.0:** <br>
+**2021-03-16 1.2.0:** <br>
 ### Funzionalita' aggiunte
 * Aggiunto il comando ```bsis_script``` command. I suoi parametri sono:
     * ```fsm_autoencoding_area```, utile per le FSM: minimizza gli stati, assegna automaticamente la codifica degli stati, ottimizza l'area e mappa il circuito per area (libreria synch)
