@@ -139,6 +139,12 @@ Tutti i metodi restituiscono un dizionario con:
 [Torna all'indice](#indice)
 
 ## Changelog ![](https://i.imgur.com/SDKHpak.png)
+**2021-09-05 1.2.2:** <br>
+### Fixes
+* I comandi che mostrano l'output su piu' pagine non vanno piu' in timeout
+    > Un esempio di comando che andava in timeout era ```help read_blif```.
+* Il metodo ```exec()``` non memorizzava gli errori del metodo ```wait_end_command()``` correttamente
+
 **2021-03-16 1.2.1:** <br>
 ### Fix
 * Il comando ```print_stats``` falliva il parsing dell'output del comando print_stats quando il circuito aveva piu' di 10000 letterali/stati

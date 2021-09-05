@@ -138,7 +138,7 @@ All the methods return a dictionary with:
 [Go to the index](#index)
 
 ## Changelog ![](https://i.imgur.com/SDKHpak.png)
-**WIP 1.2.2:** <br>
+**2021-09-05 1.2.2:** <br>
 ### Fixes
 * Commands that show paginated output don't timeout anymore
     > An example of command that shows paginated output is the ```help read_blif``` command.

@@ -1,3 +1,3 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-__version__ = "2021-03-16 1.2.1"
+__version__ = "2021-09-05 1.2.2"
