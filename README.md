@@ -97,11 +97,11 @@ This instruction spawns a SIS process using pexpect.
 From now on it is possible to execute sis commands using Python:
 
 ```python
-sis.stop()  # stop SIS and tmux's session
+sis.stop()  # stop SIS session
 
-sis.start() # start a tmux session and start SIS
-            # > Executed automatically after the instance creation
-            # > (useful after sis.stop() )
+sis.start() # start SIS session
+            # > Executed automatically after the siswrapper.Siswrapper() instance creation
+            # > (might be useful if you have closed SIS before using sis.stop())
 
 path = "file.blif"
 sis.read_blif(path)  # reads a blif file
@@ -117,8 +117,8 @@ sis.script_rugged()
 sis.exec("help")
 
 # try to execute a command and parse the output
-# without calling directly the correct method
-# > fallback method in case the command is not recognized: exec()
+# without calling directly the correct method (simulate() in this case)
+# > In case parsed_exec() can't find the right method to call, exec() is called as a fallback
 sis.parsed_exec("simulate 00 10 11")
 
 # save the circuit to a new file
@@ -138,6 +138,12 @@ All the methods return a dictionary with:
 [Go to the index](#index)
 
 ## Changelog ![](https://i.imgur.com/SDKHpak.png)
+**WIP 1.2.2:** <br>
+### Fixes
+* Commands that show paginated output don't timeout anymore
+    > An example of command that shows paginated output is the ```help read_blif``` command.
+* The ```exec()``` method didn't collect the ```wait_end_command()``` method's errors properly
+
 **2021-03-16 1.2.1:** <br>
 ### Fixes
 * the ```print_stats``` method failed the print_stats command output parsing when the circuit had 10000 literals/states or more

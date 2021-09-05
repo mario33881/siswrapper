@@ -231,21 +231,47 @@ class Siswrapper:
 
         return res
 
-    def wait_end_command(self):
+    def wait_end_command(self, t_command=""):
         """
         Waits the end of a command execution.
 
         It waits for the "sis>" prompt to appear.
 
+        If the command is shown in pages where you need to press a key to show more,
+        it sends spaces until the "sis>" prompt is shown.
+
+        :param str t_command: command that was executed by exec (optional, not needed during the start() method)
         :return dict res: results of the operation (success, errors, stdout)
         """
         res = {"success": False, "errors": [], "stdout": None}
 
         try:
-            self.sis.expect("sis>")
+            output = ""
+            paginated = False
+            while True:
+                # try to find the prompt or "--More--(xy%)" (paginated output)
+                match = self.sis.expect(["sis>", r"--(.*)--\((.*)%\)"])
+                page = self.sis.before.decode("utf-8")
+                output += page
+                if match == 0:
+                    # the prompt was found: all the output is in the output variable
+                    break
+                elif match == 1:
+                    # we are reading paginated output, use spaced to scroll through all the text
+                    paginated = True
+                    self.sis.send(" ")
+
+            # If the command's output was divided in pages 
+            # the first line is probably the command itself: if so then remove it
+            if paginated:
+                v_output = output.split("\r\n")
+                if len(v_output) > 1:
+                    if v_output[0].strip() == t_command:
+                        v_output.pop(0)
+                        output = "\r\n".join(v_output)
 
             res["success"] = True
-            res["stdout"] = self.sis.before.decode('utf-8')
+            res["stdout"] = output
 
         except pexpect.exceptions.TIMEOUT:
             res["errors"].append("[ERROR][WAIT_END_COMMAND] Timeout while waiting the end of command execution")
@@ -275,7 +301,7 @@ class Siswrapper:
         if self.started:
             self.sis.sendline(t_command.strip())
 
-            wait_res = self.wait_end_command()
+            wait_res = self.wait_end_command(t_command)
             if wait_res["success"]:
                 res["success"] = True
 
@@ -291,7 +317,7 @@ class Siswrapper:
                 if res["stdout"] == "":
                     res["stdout"] = None
             else:
-                for error in wait_res:
+                for error in wait_res["errors"]:
                     res["errors"].append("[ERROR][EXEC] Error while waiting for the end of the command: " + error)
         else:
             res["errors"].append("[ERROR][EXEC] Can't execute command: SIS's process is not running")
