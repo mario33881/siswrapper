@@ -26,7 +26,7 @@ def get_readme():
 if __name__ == '__main__':
 
     setuptools.setup(
-        install_requires=['pexpect==4.8.0'],  # dependency
+        install_requires=['pexpect==4.9.0'],  # dependency
         python_requires='>=3',
         packages=setuptools.find_packages(include=['siswrapper']),
 
