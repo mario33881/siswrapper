@@ -18,83 +18,8 @@ siswrapper_path = os.path.join(curr_dir, "..", "siswrapper")
 sys.path.insert(1, os.path.realpath(siswrapper_path))
 import siswrapper as sw
 
-boold = True
-
 
 class TestUtils(unittest.TestCase):
-
-    def test_productionenv(self):
-        """
-        Makes sure we are running in production mode (when boold is False).
-        """
-        if not boold:
-            self.assertFalse(sw.boold)
-
-    def test_string_to_list(self):
-        """
-        Tests string_to_list() function.
-        Converts a string to a list by using strip and split on a delimiter
-        """
-        tests = [
-            {"i1": "", "i2": None, "o": [""]},
-            {"i1": "   ", "i2": None, "o": [""]},
-            {"i1": "       a      ", "i2": None, "o": ["a"]},
-            {"i1": "      a b    ", "i2": None, "o": ["a", "b"]},
-            {"i1": ",,a,b,c,d,,,,", "i2": ",", "o": ["a", "b", "c", "d"]}
-        ]
-
-        for test in tests:
-
-            assert "i1" in test, ("Not well formatted input for testing ('i1' is missing in \"{}\")".format(test))
-            assert "o" in test, ("Not well formatted input for testing ('o' is missing in \"{}\")".format(test))
-
-            if test["i2"]:
-                res = sw.string_to_list(test["i1"], test["i2"])
-            else:
-                res = sw.string_to_list(test["i1"])
-
-            self.assertEqual(res, test["o"], "error during test: \"{}\"".format(test))
-
-    def test_remove_empty_els(self):
-        """
-        Tests remove_empty_els() function.
-        Removes empty strings inside a list.
-        """
-        tests = [
-            {"i": [], "o": []},
-            {"i": [""], "o": []},
-            {"i": ["   "], "o": []},
-            {"i": ["   ", "", " ", "     "], "o": []},
-            {"i": ["   ", "a", "", " ", "     ", "c", "d", "test", "    "], "o": ["a", "c", "d", "test"]},
-        ]
-
-        for test in tests:
-            assert "i" in test, ("Not well formatted input for testing ('i' is missing in \"{}\")".format(test))
-            assert "o" in test, ("Not well formatted input for testing ('o' is missing in \"{}\")".format(test))
-
-            res = sw.remove_empty_els(test["i"])
-            self.assertEqual(res, test["o"], "error during test: \"{}\"".format(test))
-
-    def test_str_to_numbers(self):
-        """
-        Tests str_to_numbers() function.
-        Converts list of numeric strings into a list of integers.
-        """
-        tests = [
-            {"i": [], "o": {"output": [], "errors": []}},
-            {"i": [""], "o": {"output": [], "errors": ["Element(s) is/are not a number"]}},
-            {"i": ["a"], "o": {"output": [], "errors": ["Element(s) is/are not a number"]}},
-            {"i": ["1", "0", "a"], "o": {"output": [], "errors": ["Element(s) is/are not a number"]}},
-            {"i": ["0", "1", "4"], "o": {"output": [0, 1, 4], "errors": []}},
-            {"i": ["123456789"], "o": {"output": [123456789], "errors": []}},
-        ]
-
-        for test in tests:
-            assert "i" in test, ("Not well formatted input for testing ('i' is missing in \"{}\")".format(test))
-            assert "o" in test, ("Not well formatted input for testing ('o' is missing in \"{}\")".format(test))
-
-            res = sw.str_to_numbers(test["i"])
-            self.assertEqual(res, test["o"], "error during test: \"{}\"".format(test))
 
     @unittest.skip("TODO: write tests")
     def test_removeprefix(self):

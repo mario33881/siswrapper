@@ -24,51 +24,6 @@ except ImportError:
     from _version import __version__  # noqa: F401
 
 
-def string_to_list(t_str, t_char=" "):
-    """
-    Returns a list of elements that are contains inside the string param.
-
-    :param str t_str: string with elements and delimiters
-    :param str t_char: delimiter of the elements
-    :return list t_list: list of elements that were inside t_str
-    """
-    t_list = t_str.strip(t_char).split(t_char)
-    return t_list
-
-
-def remove_empty_els(t_v):
-    """
-    Returns a list that doesn't contain empty strings.
-    :param list t_v: list of elements
-    :return list t_parsed_v: list of elements (no empty strings)
-    """
-    t_parsed_v = []
-    for el in t_v:
-        if el.strip() != "":
-            t_parsed_v.append(el.strip())
-
-    return t_parsed_v
-
-
-def str_to_numbers(t_v):
-    """
-    Returns a dictionary with a list of integers (converts strings into integers).
-
-    :param list t_v: list of numbers (string type)
-    :return dict out: dictionary with errors or the list of numbers converted to the integer type
-    """
-    out = {"output": [], "errors": []}
-
-    try:
-        for el in t_v:
-            out["output"].append(int(el))
-    except ValueError:
-        out["output"] = []
-        out["errors"].append("Element(s) is/are not a number")
-
-    return out
-
-
 def removeprefix(string, prefix):
     """
     Returns <string> without the <prefix> prefix.
