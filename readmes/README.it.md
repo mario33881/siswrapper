@@ -46,7 +46,7 @@ attraverso un processo eseguito in background.
 
 ## Requisiti ![](https://i.imgur.com/H3oBumq.png)
 * Sistema operativo Unix-like
-    > pexpect non possiede tutte le funzionalita' necessarie su Windows 
+    > pexpect non possiede tutte le funzionalita' necessarie su Windows
     > e SIS funziona al 100% su linux
 * Python 3
 * la libreria pexpect per Python: permette di controllare shell interattive attraverso Python
@@ -101,7 +101,7 @@ Da ora in poi e' possibile eseguire comandi SIS utilizzando Python:
 sis.stop()  # ferma la sessione di SIS
 
 sis.start() # crea una nuova sessione di SIS
-            # > operazione eseguita automaticamente durante la creazione della instanza 
+            # > operazione eseguita automaticamente durante la creazione della instanza
             # > ( utile dopo la esecuzione di sis.stop() )
 
 path = "file.blif"
@@ -208,9 +208,9 @@ e quando viene eseguito il comando ```sim```
 **2021-01-04 1.1.0:** <br>
 ### Funzionalita' aggiunte
 * Aggiunto il metodo ```parsed_output()```:
-  legge un comando e chiama automaticamente il metodo migliore 
+  legge un comando e chiama automaticamente il metodo migliore
   per fare il parsing dell'output del comando stesso.
-  
+
   Se il comando non viene riconosciuto verra' eseguito dal metodo ```exec()```.
 
 ### Cambiamenti
@@ -219,9 +219,9 @@ e quando viene eseguito il comando ```sim```
     > quindi il tipo stringa ha piu' senso
 
 ### Fix
-* Adesso il metodo ```exec()``` sa come gestire i comandi ```quit``` 
+* Adesso il metodo ```exec()``` sa come gestire i comandi ```quit```
   e ```exit``` senza lanciare Exception.
-  
+
 **2020-11-14 1.0.0:** <br>
 Primo commit
 

@@ -216,7 +216,7 @@ class Siswrapper:
                     paginated = True
                     self.sis.send(" ")
 
-            # If the command's output was divided in pages 
+            # If the command's output was divided in pages
             # the first line is probably the command itself: if so then remove it
             if paginated:
                 v_output = output.split("\r\n")
@@ -1270,5 +1270,4 @@ class Siswrapper:
 
 
 if __name__ == "__main__":
-
     sis = Siswrapper()

@@ -6,7 +6,7 @@ Siswrapper is a **wrapper for [SIS](https://jackhack96.github.io/logic-synthesis
 
 Siswrapper enables developers to code scripts that embeds SIS in any way.
 
-> Read this README in: 
+> Read this README in:
 >
 > |[English](https://github.com/mario33881/siswrapper/blob/main/README.md)|[Italiano](https://github.com/mario33881/siswrapper/blob/main/readmes/README.it.md)|
 > |-|-|
@@ -51,7 +51,7 @@ to control interactive shells by spawning and connecting to their process.
 * the pexpect library for Python: control interactive shells via Python
 * SIS, set in the path environment variable (callable with the ```sis``` command): the tool for synthesis and optimization of sequential circuits
     > You can [download it here](https://jackhack96.github.io/logic-synthesis/sis.html)
-    
+
 [Go to the index](#index)
 
 ## Installation
@@ -112,7 +112,7 @@ sis.simulate("010010") # executes a simulation
 # optimize the circuit using the rugged script
 sis.script_rugged()
 
-# execute a command that is not 
+# execute a command that is not
 # directly supported by this library:
 sis.exec("help")
 
@@ -186,7 +186,7 @@ All the methods return a dictionary with:
 * If you call the ```write_eqn``` and ```write_blif``` method without parameters the output doesn't contain the command.
 * When SIS is not installed the error message shows exactly what the problem is
 * Can't execute the rugged script if no file as been read with a read command
-* When you execute a read command, this library calls the ```reset``` method to close the SIS session and 
+* When you execute a read command, this library calls the ```reset``` method to close the SIS session and
   open a new session inside the folder of the input file
     > This "fixes" the ".search x file not found" error when you try to read a file that is in another folder and contains the .search keyword.
     >
@@ -208,8 +208,8 @@ and with the abbreviated command ```sim```
 ### Added features
 * Added the ```parsed_output()``` method:
   it reads a command and automatically calls the best method
-  to parse the output of that command. 
-  
+  to parse the output of that command.
+
   If the command is not recognized it falls back to the ```exec()``` method.
 
 ### Changes
@@ -218,7 +218,7 @@ and with the abbreviated command ```sim```
     > so the string type makes more sense
 
 ### Fixes
-* Now the ```exec()``` knows how to treat the ```quit``` 
+* Now the ```exec()``` knows how to treat the ```quit```
   and ```exit``` commands without raising Exceptions.
 
 **2020-11-14 1.0.0:** <br>
